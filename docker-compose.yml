@@ -1,0 +1,50 @@
+version: "3"
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+services:
+  php-fpm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /var/www/vendor
+      - .:/var/www
+    expose:
+      - "9000"
+    networks:
+      - frontend
+      - backend
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - php-fpm
+    networks:
+      - frontend
+
+  mariadb:
+    image: mariadb:10.4
+    restart: always
+    volumes:
+      - ./mariadb:/var/lib/mysql
+      - ./deploy/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    environment:
+      - TZ=UTC
+      - MYSQL_DATABASE=bookr
+      - MYSQL_USER=default
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - backend
