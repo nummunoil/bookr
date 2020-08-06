@@ -22,3 +22,13 @@ $factory->define(User::class, function (Faker $faker) {
         'email' => $faker->email,
     ];
 });
+
+
+$factory->define(App\Book::class, function ($faker) {
+    $title = $faker->sentence(rand(3, 10));
+
+    return [
+        'title' => substr($title, 0, strlen($title) - 1), 'description' => $faker->text,
+        'author' => $faker->name
+    ];
+});
