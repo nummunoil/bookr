@@ -2,6 +2,7 @@
 
 namespace App\Transformer;
 
+use App\Book;
 use League\Fractal\TransformerAbstract;
 
 class BookTransformer extends TransformerAbstract
