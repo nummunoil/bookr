@@ -31,8 +31,7 @@ class FractalResponseTest extends TestCase
 
         // Scope
         $scope = m::mock('League\Fractal\Scope');
-        $scope
-            ->shouldReceive('toArray')
+        $scope->shouldReceive('toArray')
             ->once()
             ->andReturn(['foo' => 'bar']);
 
@@ -40,18 +39,48 @@ class FractalResponseTest extends TestCase
         $serializer = m::mock('League\Fractal\Serializer\SerializerAbstract');
 
         $manager = m::mock('League\Fractal\Manager');
-        $manager
-            ->shouldReceive('setSerializer')
+        $manager->shouldReceive('setSerializer')
             ->with($serializer)
             ->once();
-        $manager
-            ->shouldReceive('createData')
+        $manager->shouldReceive('createData')
             ->once()
             ->andReturn($scope);
 
         $subject = new FractalResponse($manager, $serializer);
 
         $result = $subject->item(['one' => 'item'], $transformer);
+        $this->assertIsArray($result);
+    }
+
+    /** @test **/
+    public function it_can_transform_a_collection()
+    {
+        $data = [
+            ['foo' => 'bar'],
+            ['fizz' => 'buzz'],
+        ];
+
+        // Transformer
+        $transformer = m::mock('League\Fractal\TransformerAbstract');
+
+        // Scope
+        $scope = m::mock('League\Fractal\Scope');
+        $scope->shouldReceive('toArray')
+            ->once()
+            ->andReturn($data);
+
+        // Serializer
+        $serializer = m::mock('League\Fractal\Serializer\SerializerAbstract');
+        $manager = m::mock('League\Fractal\Manager');
+        $manager->shouldReceive('setSerializer')
+            ->with($serializer)
+            ->once();
+        $manager->shouldReceive('createData')
+            ->once()
+            ->andReturn($scope);
+
+        $subject = new FractalResponse($manager, $serializer);
+        $result = $subject->collection($data, $transformer);
         $this->assertIsArray($result);
     }
 }
