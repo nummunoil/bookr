@@ -3,11 +3,29 @@
 namespace Tests\App\Http\Controllers;
 
 use TestCase;
+use Carbon\Carbon;
 use Laravel\Lumen\Testing\DatabaseMigrations;
 
 class BooksControllerTest extends TestCase
 {
     use DatabaseMigrations;
+
+    public function setUp() : void
+    {
+        parent::setUp();
+
+        Carbon::setTestNow(Carbon::now('UTC'));
+    }
+
+    public function tearDown() : void
+    {
+        parent::tearDown();
+
+        Carbon::setTestNow();
+    }
+
+    // ...
+
     
     /** @test **/
     public function index_status_code_should_be_200()
@@ -104,6 +122,10 @@ class BooksControllerTest extends TestCase
         );
         $this->assertEquals('H. G. Wells', $data['author']);
         $this->assertTrue($data['id'] > 0, 'Expected a positive integer, but did not see one.');
+        $this->assertArrayHasKey('created', $data);
+        $this->assertEquals(Carbon::now()->toIso8601String(), $data['created']);
+        $this->assertArrayHasKey('updated', $data);
+        $this->assertEquals(Carbon::now()->toIso8601String(), $data['updated']);
         $this->seeInDatabase('books', ['title' => 'The Invisible Man']);
     }
 
@@ -155,6 +177,12 @@ class BooksControllerTest extends TestCase
         // Verify the data key in the response
         $body = json_decode($this->response->getContent(), true);
         $this->assertArrayHasKey('data', $body);
+
+        $data = $body['data'];
+        $this->assertArrayHasKey('created', $data);
+        $this->assertEquals(Carbon::now()->toIso8601String(), $data['created']);
+        $this->assertArrayHasKey('updated', $data);
+        $this->assertEquals(Carbon::now()->toIso8601String(), $data['updated']);
     }
 
     /** @test **/
