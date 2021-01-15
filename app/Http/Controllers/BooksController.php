@@ -6,19 +6,29 @@ use App\Book;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Http\Response\FractalResponse;
+use App\Transformer\BookTransformer;
+
 /**
 * Class BooksController
 * @package App\Http\Controllers
 */
 class BooksController
 {
+    public function __construct(FractalResponse $fractal)
+    {
+        $this->fractal = $fractal;
+    }
+
+
     /**
      * GET /books
      * @return array
      */
     public function index()
     {
-        return ['data' => Book::all()->toArray()];
+        $books = Book::all();
+        return $this->fractal->collection($books, new BookTransformer());
     }
 
     /**
@@ -28,7 +38,8 @@ class BooksController
     */
     public function show($id)
     {
-        return ['data' => Book::findOrFail($id)->toArray()];
+        $book = Book::findOrFail($id);
+        return $this->fractal->item($book, new BookTransformer());
     }
 
     /**
