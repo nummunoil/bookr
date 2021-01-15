@@ -43,7 +43,9 @@ class BooksController extends Controller
     {
         $book = Book::create($request->all());
 
-        return response()->json(['data' => $book->toArray()], 201, [
+        $data = $this->item($book, new BookTransformer());
+
+        return response()->json($data, 201, [
             'Location' => route('books.show', ['id' => $book->id])
         ]);
     }
