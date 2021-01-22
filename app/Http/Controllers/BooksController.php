@@ -74,7 +74,13 @@ class BooksController extends Controller
                 ]
             ], 404);
         }
-            
+
+        $this->validate($request, [
+            'title' => 'required',
+            'description' => 'required',
+            'author' => 'required'
+        ]);
+
         $book->fill($request->all());
         $book->save();
 
