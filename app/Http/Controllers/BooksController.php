@@ -41,6 +41,12 @@ class BooksController extends Controller
     */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'title' => 'required',
+            'description' => 'required',
+            'author' => 'required'
+        ]);
+
         $book = Book::create($request->all());
 
         $data = $this->item($book, new BookTransformer());
