@@ -42,7 +42,7 @@ class BooksController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'title' => 'required',
+            'title' => 'required|max:255',
             'description' => 'required',
             'author' => 'required'
         ]);
@@ -76,7 +76,7 @@ class BooksController extends Controller
         }
 
         $this->validate($request, [
-            'title' => 'required',
+            'title' => 'required|max:255',
             'description' => 'required',
             'author' => 'required'
         ]);
