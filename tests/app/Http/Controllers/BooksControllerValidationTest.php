@@ -53,4 +53,46 @@ class BooksControllerValidationTest extends TestCase
         $this->assertEquals(["The description field is required."], $body['description']);
         $this->assertEquals(["The author field is required."], $body['author']);
     }
+
+    /** @test **/
+    public function title_fails_create_validation_when_just_too_long()
+    {
+        // Creating a book
+        $book = factory(\App\Book::class)->make();
+
+        $book->title = str_repeat('a', 256);
+
+        $this->post("/books", [
+            'title' => $book->title,
+            'description' => $book->description,
+            'author' => $book->author,
+        ], ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->seeJson([
+                'title' => ["The title may not be greater than 255 characters."]
+            ])
+            ->notSeeInDatabase('books', ['title' => $book->title]);
+    }
+
+    /** @test **/
+    public function title_fails_update_validation_when_just_too_long()
+    {
+        // Updating a book
+        $book = factory(\App\Book::class)->create();
+
+        $book->title = str_repeat('a', 256);
+
+        $this->put("/books/{$book->id}", [
+            'title' => $book->title,
+            'description' => $book->description,
+            'author' => $book->author
+        ], ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->seeJson([
+                'title' => ["The title may not be greater than 255 characters."]
+            ])
+            ->notSeeInDatabase('books', ['title' => $book->title]);
+    }
 }
