@@ -28,7 +28,7 @@ class BooksControllerValidationTest extends TestCase
         $this->assertArrayHasKey('description', $body);
         $this->assertArrayHasKey('author', $body);
         $this->assertEquals(["The title field is required."], $body['title']);
-        $this->assertEquals(["The description field is required."], $body['description']);
+        $this->assertEquals(["Please provide a description."], $body['description']);
         $this->assertEquals(["The author field is required."], $body['author']);
     }
 
@@ -50,7 +50,7 @@ class BooksControllerValidationTest extends TestCase
         $this->assertArrayHasKey('author', $body);
 
         $this->assertEquals(["The title field is required."], $body['title']);
-        $this->assertEquals(["The description field is required."], $body['description']);
+        $this->assertEquals(["Please provide a description."], $body['description']);
         $this->assertEquals(["The author field is required."], $body['author']);
     }
 
@@ -119,7 +119,7 @@ class BooksControllerValidationTest extends TestCase
     {
         // Updating a book
         $book = factory(\App\Book::class)->create();
-        
+
         $book->title = str_repeat('a', 255);
 
         $this->put("/books/{$book->id}", [

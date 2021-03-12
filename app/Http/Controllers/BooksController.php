@@ -45,6 +45,8 @@ class BooksController extends Controller
             'title' => 'required|max:255',
             'description' => 'required',
             'author' => 'required'
+        ], [
+            'description.required' => 'Please provide a :attribute.'
         ]);
 
         $book = Book::create($request->all());
@@ -79,6 +81,8 @@ class BooksController extends Controller
             'title' => 'required|max:255',
             'description' => 'required',
             'author' => 'required'
+        ], [
+            'description.required' => 'Please provide a :attribute.'
         ]);
 
         $book->fill($request->all());
