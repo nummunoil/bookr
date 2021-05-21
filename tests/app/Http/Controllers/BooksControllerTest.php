@@ -36,7 +36,7 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function index_should_return_a_collection_of_records()
     {
-        $books = factory('App\Book', 2)->create();
+        $books = $this->bookFactory(2);
 
         $this->get('/books');
 
@@ -49,7 +49,7 @@ class BooksControllerTest extends TestCase
                 'id' => $book->id,
                 'title' => $book->title,
                 'description' => $book->description,
-                'author' => $book->author,
+                'author' => $book->author->name, // Check the author's name
                 'created' => $book->created_at->toIso8601String(),
                 'updated' => $book->updated_at->toIso8601String(),
             ]);
@@ -59,7 +59,7 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function show_should_return_a_valid_book()
     {
-        $book = factory('App\Book')->create();
+        $book = $this->bookFactory();
 
         $this ->get("/books/{$book->id}")
             ->seeStatusCode(200);
@@ -76,7 +76,7 @@ class BooksControllerTest extends TestCase
         $this->assertEquals($book->id, $data['id']);
         $this->assertEquals($book->title, $data['title']);
         $this->assertEquals($book->description, $data['description']);
-        $this->assertEquals($book->author, $data['author']);
+        $this->assertEquals($book->author->name, $data['author']);
         $this->assertEquals($book->created_at->toIso8601String(), $data['created']);
         $this->assertEquals($book->updated_at->toIso8601String(), $data['created']);
     }
@@ -139,10 +139,12 @@ class BooksControllerTest extends TestCase
     /** @test */
     public function store_should_respond_with_a_201_and_location_header_when_successful()
     {
+        $author = factory(\App\Author::class)->create();
+
         $this->post('/books', [
                 'title' => 'The Invisible Man',
                 'description' => 'An invisible man is trapped in the terror of his own creation',
-                'author' => 'H. G. Wells'
+                'author_id' => $author->id
             ]);
         $this->seeStatusCode(201)
             ->seeHeaderWithRegExp('Location', '#/books/[\d]+$#');
