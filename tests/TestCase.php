@@ -61,15 +61,11 @@ abstract class TestCase extends BaseTestCase
         $author = factory(\App\Author::class)->create();
         $books = factory(\App\Book::class, $count)->make();
 
-        if ($count === 1) {
-            $books->author()->associate($author);
-            $books->save();
-        } else {
-            $books->each(function ($book) use ($author) {
-                $book->author()->associate($author);
-                $book->save();
-            });
-        }
-        return $books;
+        $books->each(function ($book) use ($author) {
+            $book->author()->associate($author);
+            $book->save();
+        });
+
+        return $count == 1 ? $books->first() : $books;
     }
 }

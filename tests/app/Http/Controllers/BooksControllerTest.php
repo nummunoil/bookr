@@ -151,31 +151,24 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function update_should_only_change_fillable_fields()
     {
-        $book = factory('App\Book')->create([
-            'title' => 'War of the Worlds',
-            'description' => 'A science fiction masterpiece about Martians invading London',
-            'author' => 'H. G. Wells',
-            ]);
+        $book = $this->bookFactory();
 
         $this->notSeeInDatabase('books', [
             'title' => 'The War of the Worlds',
             'description' => 'The book is way better than the movie.',
-            'author' => 'Wells, H. G.'
         ]);
-                
+
         $this->put("/books/{$book->id}", [
-            'id' => 5,
+            // 'id' => 5,
             'title' => 'The War of the Worlds',
-            'description' => 'The book is way better than the movie.',
-            'author' => 'Wells, H. G.'
-        ]);
+            'description' => 'The book is way better than the movie.'
+        ], ['Accept' => 'application/json']);
 
         $this->seeStatusCode(200)
             ->seeJson([
                 'id' => 1,
                 'title' => 'The War of the Worlds',
                 'description' => 'The book is way better than the movie.',
-                'author' => 'Wells, H. G.'
             ])
             ->seeInDatabase('books', [
                 'title' => 'The War of the Worlds'
