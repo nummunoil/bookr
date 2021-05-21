@@ -36,7 +36,7 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function index_should_return_a_collection_of_records()
     {
-        $books = factory('App\Book', 2)->create();
+        $books = $this->bookFactory(2);
 
         $this->get('/books');
 
@@ -59,7 +59,7 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function show_should_return_a_valid_book()
     {
-        $book = factory('App\Book')->create();
+        $book = $this->bookFactory();
 
         $this ->get("/books/{$book->id}")
             ->seeStatusCode(200);
