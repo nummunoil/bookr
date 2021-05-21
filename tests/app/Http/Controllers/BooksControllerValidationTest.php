@@ -35,7 +35,7 @@ class BooksControllerValidationTest extends TestCase
     /** @test **/
     public function it_validates_required_fields_when_updating_a_book()
     {
-        $book = factory(\App\Book::class)->create();
+        $book = $this->bookFactory();
 
         $this->put("/books/{$book->id}", [], ['Accept' => 'application/json']);
         $this->assertEquals(
@@ -47,11 +47,9 @@ class BooksControllerValidationTest extends TestCase
 
         $this->assertArrayHasKey('title', $body);
         $this->assertArrayHasKey('description', $body);
-        $this->assertArrayHasKey('author', $body);
 
         $this->assertEquals(["The title field is required."], $body['title']);
         $this->assertEquals(["Please provide a description."], $body['description']);
-        $this->assertEquals(["The author field is required."], $body['author']);
     }
 
     /** @test **/
