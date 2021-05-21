@@ -106,15 +106,20 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function store_should_save_new_book_in_the_database()
     {
+        $author = factory(\App\Author::class)->create([
+            'name' => 'H. G. Wells'
+        ]);
+
         $this->post('/books', [
             'title' => 'The Invisible Man',
             'description' => 'An invisible man is trapped in the terror of his own creation',
-            'author' => 'H. G. Wells'
-        ]);
+            'author_id' => $author->id
+        ], ['Accept' => 'application/json']);
 
         $body = json_decode($this->response->getContent(), true);
-        dd($body, $this->response->getStatusCode());
+        dd($body);
         $this->assertArrayHasKey('data', $body);
+
         $data = $body['data'];
         $this->assertEquals('The Invisible Man', $data['title']);
         $this->assertEquals(
@@ -127,6 +132,7 @@ class BooksControllerTest extends TestCase
         $this->assertEquals(Carbon::now()->toIso8601String(), $data['created']);
         $this->assertArrayHasKey('updated', $data);
         $this->assertEquals(Carbon::now()->toIso8601String(), $data['updated']);
+
         $this->seeInDatabase('books', ['title' => 'The Invisible Man']);
     }
 
