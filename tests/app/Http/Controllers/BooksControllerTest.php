@@ -208,8 +208,8 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function destroy_should_remove_a_valid_book()
     {
-        $book = factory('App\Book')->create();
-        
+        $book = $this->bookFactory();
+
         $this->delete("/books/{$book->id}")
             ->seeStatusCode(204)
             ->isEmpty();
