@@ -49,4 +49,27 @@ abstract class TestCase extends BaseTestCase
             
         return $this;
     }
+
+    /**
+    * Convenience method for creating a book with an author
+    *
+    * @param int $count
+    * @return mixed
+    */
+    protected function bookFactory($count = 1)
+    {
+        $author = factory(\App\Author::class)->create();
+        $books = factory(\App\Book::class, $count)->make();
+
+        if ($count === 1) {
+            $books->author()->associate($author);
+            $books->save();
+        } else {
+            $books->each(function ($book) use ($author) {
+                $book->author()->associate($author);
+                $book->save();
+            });
+        }
+        return $books;
+    }
 }

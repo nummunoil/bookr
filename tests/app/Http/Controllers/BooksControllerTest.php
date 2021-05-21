@@ -113,6 +113,7 @@ class BooksControllerTest extends TestCase
         ]);
 
         $body = json_decode($this->response->getContent(), true);
+        dd($body, $this->response->getStatusCode());
         $this->assertArrayHasKey('data', $body);
         $data = $body['data'];
         $this->assertEquals('The Invisible Man', $data['title']);
