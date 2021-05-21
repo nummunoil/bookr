@@ -117,7 +117,7 @@ class BooksControllerTest extends TestCase
         ], ['Accept' => 'application/json']);
 
         $body = json_decode($this->response->getContent(), true);
-        dd($body);
+
         $this->assertArrayHasKey('data', $body);
 
         $data = $body['data'];
