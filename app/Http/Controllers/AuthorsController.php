@@ -26,6 +26,12 @@ class AuthorsController extends Controller
 
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'name' => 'required',
+            'gender' => 'required',
+            'biography' => 'required'
+        ]);
+
         $author = Author::create($request->all());
 
         $data = $this->item($author, new AuthorTransformer());

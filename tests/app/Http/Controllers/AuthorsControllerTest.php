@@ -141,4 +141,23 @@ class AuthorsControllerTest extends TestCase
         $this->seeJson($postData);
         $this->seeInDatabase('authors', $postData);
     }
+
+    /** @test **/
+    public function store_method_validates_required_fields()
+    {
+        $this->post(
+            '/authors',
+            [],
+            ['Accept' => 'application/json']
+        );
+
+        $data = $this->response->getData(true);
+
+        $fields = ['name', 'gender', 'biography'];
+
+        foreach ($fields as $field) {
+            $this->assertArrayHasKey($field, $data);
+            $this->assertEquals(["The {$field} field is required."], $data[$field]);
+        }
+    }
 }
