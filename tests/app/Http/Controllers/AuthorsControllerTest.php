@@ -213,8 +213,29 @@ class AuthorsControllerTest extends TestCase
         ];
 
         $this->post('/authors', $postData, ['Accept' => 'application/json']);
-        
+
         $this->seeStatusCode(201);
         $this->seeInDatabase('authors', $postData);
+    }
+
+    /** @test **/
+    public function store_returns_a_valid_location_header()
+    {
+        $postData = [
+            'name' => 'H. G. Wells',
+            'gender' => 'male',
+            'biography' => 'Prolific Science-Fiction Writer'
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json'])
+            ->seeStatusCode(201);
+
+        $data = $this->response->getData(true);
+        $this->assertArrayHasKey('data', $data);
+        $this->assertArrayHasKey('id', $data['data']);
+
+        // Check the Location header
+        $id = $data['data']['id'];
+        $this->seeHeaderWithRegExp('Location', "#/authors/{$id}$#");
     }
 }

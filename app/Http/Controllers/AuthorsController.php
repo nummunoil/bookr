@@ -38,6 +38,8 @@ class AuthorsController extends Controller
 
         $data = $this->item($author, new AuthorTransformer());
 
-        return response()->json($data, 201);
+        return response()->json($data, 201, [
+            'Location' => route('authors.show', ['id' => $author->id])
+        ]);
     }
 }
