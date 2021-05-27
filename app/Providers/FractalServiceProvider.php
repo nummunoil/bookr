@@ -9,7 +9,6 @@ use League\Fractal\Serializer\DataArraySerializer;
 
 class FractalServiceProvider extends ServiceProvider
 {
-
     public function register()
     {
         // Bind the DataArraySerializer to an interface contract
@@ -21,7 +20,7 @@ class FractalServiceProvider extends ServiceProvider
             $manager = new Manager();
             $serializer = $app['League\Fractal\Serializer\SerializerAbstract'];
 
-            return new FractalResponse($manager, $serializer);
+            return new FractalResponse($manager, $serializer, $app['request']);
         });
 
         $this->app->alias(FractalResponse::class, 'fractal');
@@ -30,5 +29,4 @@ class FractalServiceProvider extends ServiceProvider
     public function boot()
     {
     }
-
 }
