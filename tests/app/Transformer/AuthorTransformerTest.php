@@ -42,4 +42,16 @@ class AuthorTransformerTest extends TestCase
             $actual['created']
         );
     }
+
+    /** @test **/
+    public function it_can_transform_related_books()
+    {
+        $book = $this->bookFactory();
+
+        $author = $book->author;
+
+        $data = $this->subject->includeBooks($author);
+
+        $this->assertInstanceOf(\League\Fractal\Resource\Collection::class, $data);
+    }
 }
