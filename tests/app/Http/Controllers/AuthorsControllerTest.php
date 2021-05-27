@@ -83,4 +83,44 @@ class AuthorsControllerTest extends TestCase
         $this->assertEquals('Not Found', $error['message']);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $error['status']);
     }
+
+    /** @test **/
+    public function show_optionally_includes_books()
+    {
+        $book = $this->bookFactory();
+        $author = $book->author;
+
+        $this->get(
+            "/authors/{$author->id}?include=books",
+            ['Accept' => 'application/json']
+        );
+
+        $body = json_decode($this->response->getContent(), true);
+
+        $this->assertArrayHasKey('data', $body);
+        $data = $body['data'];
+        $this->assertArrayHasKey('books', $data);
+        $this->assertArrayHasKey('data', $data['books']);
+        $this->assertCount(1, $data['books']['data']);
+
+        // See Author Data
+        $this->seeJson([
+            'id' => $author->id,
+            'name' => $author->name,
+        ]);
+
+        // Test included book Data (the first record)
+        $actual = $data['books']['data'][0];
+        $this->assertEquals($book->id, $actual['id']);
+        $this->assertEquals($book->title, $actual['title']);
+        $this->assertEquals($book->description, $actual['description']);
+        $this->assertEquals(
+            $book->created_at->toIso8601String(),
+            $actual['created']
+        );
+        $this->assertEquals(
+            $book->updated_at->toIso8601String(),
+            $actual['updated']
+        );
+    }
 }
