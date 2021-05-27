@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Author;
 use App\Transformer\AuthorTransformer;
+use Illuminate\Http\Request;
 
 class AuthorsController extends Controller
 {
@@ -21,5 +22,14 @@ class AuthorsController extends Controller
             Author::findOrFail($id),
             new AuthorTransformer()
         );
+    }
+
+    public function store(Request $request)
+    {
+        $author = Author::create($request->all());
+
+        $data = $this->item($author, new AuthorTransformer());
+
+        return response()->json($data, 201);
     }
 }

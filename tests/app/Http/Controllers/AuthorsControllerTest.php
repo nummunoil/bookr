@@ -123,4 +123,22 @@ class AuthorsControllerTest extends TestCase
             $actual['updated']
         );
     }
+
+    /** @test **/
+    public function store_can_create_a_new_author()
+    {
+        $postData = [
+            'name' => 'H. G. Wells',
+            'gender' => 'male',
+            'biography' => 'Prolific Science-Fiction Writer',
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(201);
+        $data = $this->response->getData(true);
+        $this->assertArrayHasKey('data', $data);
+        $this->seeJson($postData);
+        $this->seeInDatabase('authors', $postData);
+    }
 }
