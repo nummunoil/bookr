@@ -181,4 +181,40 @@ class AuthorsControllerTest extends TestCase
             $data['gender']
         );
     }
+
+    /** @test **/
+    public function store_invalidates_name_when_name_is_just_too_long()
+    {
+        $postData = [
+            'name' => str_repeat('a', 256),
+            'gender' => 'male',
+            'biography' => 'A Valid Biography'
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(422);
+        $data = $this->response->getData(true);
+        $this->assertCount(1, $data);
+        $this->assertArrayHasKey('name', $data);
+        $this->assertEquals(
+            ["The name may not be greater than 255 characters."],
+            $data['name']
+        );
+    }
+
+    /** @test **/
+    public function store_is_valid_when_name_is_just_long_enough()
+    {
+        $postData = [
+            'name' => str_repeat('a', 255),
+            'gender' => 'male',
+            'biography' => 'A Valid Biography'
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json']);
+        
+        $this->seeStatusCode(201);
+        $this->seeInDatabase('authors', $postData);
+    }
 }

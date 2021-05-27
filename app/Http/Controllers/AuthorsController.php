@@ -27,7 +27,7 @@ class AuthorsController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required',
+            'name' => 'required|max:255',
             'gender' => ['required','regex:/^(male|female)$/i'],
             'biography' => 'required'
         ], [
