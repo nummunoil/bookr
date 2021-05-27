@@ -123,4 +123,119 @@ class AuthorsControllerTest extends TestCase
             $actual['updated']
         );
     }
+
+    /** @test **/
+    public function store_can_create_a_new_author()
+    {
+        $postData = [
+            'name' => 'H. G. Wells',
+            'gender' => 'male',
+            'biography' => 'Prolific Science-Fiction Writer',
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(201);
+        $data = $this->response->getData(true);
+        $this->assertArrayHasKey('data', $data);
+        $this->seeJson($postData);
+        $this->seeInDatabase('authors', $postData);
+    }
+
+    /** @test **/
+    public function store_method_validates_required_fields()
+    {
+        $this->post(
+            '/authors',
+            [],
+            ['Accept' => 'application/json']
+        );
+
+        $data = $this->response->getData(true);
+
+        $fields = ['name', 'gender', 'biography'];
+
+        foreach ($fields as $field) {
+            $this->assertArrayHasKey($field, $data);
+            $this->assertEquals(["The {$field} field is required."], $data[$field]);
+        }
+    }
+
+    /** @test **/
+    public function store_invalidates_incorrect_gender_data()
+    {
+        $postData = [
+            'name' => 'John Doe',
+            'gender' => 'unknown',
+            'biography' => 'An anonymous author'
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(422);
+        $data = $this->response->getData(true);
+        $this->assertCount(1, $data);
+        $this->assertArrayHasKey('gender', $data);
+        $this->assertEquals(
+            ["Gender format is invalid: must equal 'male' or 'female'"],
+            $data['gender']
+        );
+    }
+
+    /** @test **/
+    public function store_invalidates_name_when_name_is_just_too_long()
+    {
+        $postData = [
+            'name' => str_repeat('a', 256),
+            'gender' => 'male',
+            'biography' => 'A Valid Biography'
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(422);
+        $data = $this->response->getData(true);
+        $this->assertCount(1, $data);
+        $this->assertArrayHasKey('name', $data);
+        $this->assertEquals(
+            ["The name may not be greater than 255 characters."],
+            $data['name']
+        );
+    }
+
+    /** @test **/
+    public function store_is_valid_when_name_is_just_long_enough()
+    {
+        $postData = [
+            'name' => str_repeat('a', 255),
+            'gender' => 'male',
+            'biography' => 'A Valid Biography'
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(201);
+        $this->seeInDatabase('authors', $postData);
+    }
+
+    /** @test **/
+    public function store_returns_a_valid_location_header()
+    {
+        $postData = [
+            'name' => 'H. G. Wells',
+            'gender' => 'male',
+            'biography' => 'Prolific Science-Fiction Writer'
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json'])
+            ->seeStatusCode(201);
+
+        $data = $this->response->getData(true);
+        $this->assertArrayHasKey('data', $data);
+        $this->assertArrayHasKey('id', $data['data']);
+
+        // Check the Location header
+        $id = $data['data']['id'];
+        $this->seeHeaderWithRegExp('Location', "#/authors/{$id}$#");
+    }
 }

@@ -27,7 +27,7 @@ $router->delete('/books/{id:[\d]+}', 'BooksController@destroy');
 $router->group(['prefix' => '/authors'], function () use ($router) {
     $router->get('/', 'AuthorsController@index');
     $router->post('/', 'AuthorsController@store');
-    $router->get('/{id:[\d]+}', 'AuthorsController@show');
+    $router->get('/{id:[\d]+}', ['as' => 'authors.show','uses' => 'AuthorsController@show']);
     $router->put('/{id:[\d]+}', 'AuthorsController@update');
     $router->delete('/{id:[\d]+}', 'AuthorsController@destroy');
 });
