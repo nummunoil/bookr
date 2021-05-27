@@ -54,4 +54,18 @@ class FractalResponse
     {
         return $this->manager->createData($resource)->toArray();
     }
+
+    /**
+    * Get the includes from the request if none are passed.
+    *
+    * @param null $includes
+    */
+    public function parseIncludes($includes = null)
+    {
+        if (empty($includes)) {
+            $includes = $this->request->query('include', '');
+        }
+
+        $this->manager->parseIncludes($includes);
+    }
 }

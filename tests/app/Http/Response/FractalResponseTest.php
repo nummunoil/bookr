@@ -92,4 +92,38 @@ class FractalResponseTest extends TestCase
         $result = $subject->collection($data, $transformer);
         $this->assertIsArray($result);
     }
+
+    /** @test **/
+    public function it_should_parse_passed_includes_when_passed()
+    {
+        $serializer = m::mock(SerializerAbstract::class);
+
+        $manager = m::mock(Manager::class);
+        $manager->shouldReceive('setSerializer')->with($serializer);
+        $manager->shouldReceive('parseIncludes')->with('books');
+
+        $request = m::mock(Request::class);
+        $request->shouldNotReceive('query');
+
+        $subject = new FractalResponse($manager, $serializer, $request);
+
+        $subject->parseIncludes('books');
+    }
+
+    /** @test **/
+    public function it_should_parse_request_query_includes_with_no_arguments()
+    {
+        $serializer = m::mock(SerializerAbstract::class);
+
+        $manager = m::mock(Manager::class);
+        $manager->shouldReceive('setSerializer')->with($serializer);
+        $manager->shouldReceive('parseIncludes')->with('books');
+
+        $request = m::mock(Request::class);
+        $request->shouldReceive('query')
+            ->with('include', '')
+            ->andReturn('books');
+
+        (new FractalResponse($manager, $serializer, $request))->parseIncludes();
+    }
 }
