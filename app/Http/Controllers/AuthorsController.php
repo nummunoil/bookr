@@ -28,9 +28,11 @@ class AuthorsController extends Controller
     {
         $this->validate($request, [
             'name' => 'required',
-            'gender' => 'required',
+            'gender' => ['required','regex:/^(male|female)$/i'],
             'biography' => 'required'
-        ]);
+        ], [
+            'gender.regex' => "Gender format is invalid: must equal 'male' or 'female'"
+            ]);
 
         $author = Author::create($request->all());
 

@@ -160,4 +160,25 @@ class AuthorsControllerTest extends TestCase
             $this->assertEquals(["The {$field} field is required."], $data[$field]);
         }
     }
+
+    /** @test **/
+    public function store_invalidates_incorrect_gender_data()
+    {
+        $postData = [
+            'name' => 'John Doe',
+            'gender' => 'unknown',
+            'biography' => 'An anonymous author'
+        ];
+
+        $this->post('/authors', $postData, ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(422);
+        $data = $this->response->getData(true);
+        $this->assertCount(1, $data);
+        $this->assertArrayHasKey('gender', $data);
+        $this->assertEquals(
+            ["Gender format is invalid: must equal 'male' or 'female'"],
+            $data['gender']
+        );
+    }
 }
