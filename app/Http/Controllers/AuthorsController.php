@@ -26,13 +26,7 @@ class AuthorsController extends Controller
 
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'name' => 'required|max:255',
-            'gender' => ['required','regex:/^(male|female)$/i'],
-            'biography' => 'required'
-        ], [
-            'gender.regex' => "Gender format is invalid: must equal 'male' or 'female'"
-            ]);
+        $this->validateAuthor($request);
 
         $author = Author::create($request->all());
 
@@ -40,6 +34,37 @@ class AuthorsController extends Controller
 
         return response()->json($data, 201, [
             'Location' => route('authors.show', ['id' => $author->id])
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $this->validateAuthor($request);
+
+        $author = Author::findOrFail($id);
+
+        $author->fill($request->all());
+
+        $author->save();
+
+        $data = $this->item($author, new AuthorTransformer());
+        return response()->json($data, 200);
+    }
+
+
+    /**
+    * Validate author updates from the request.
+    *
+    * @param Request $request
+    */
+    private function validateAuthor(Request $request)
+    {
+        $this->validate($request, [
+            'name' => 'required|max:255',
+            'gender' => [ 'required', 'regex:/^(male|female)$/i' ],
+            'biography' => 'required'
+        ], [
+            'gender.regex' => "Gender format is invalid: must equal 'male' or 'female'"
         ]);
     }
 }

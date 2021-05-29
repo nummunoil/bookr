@@ -238,4 +238,164 @@ class AuthorsControllerTest extends TestCase
         $id = $data['data']['id'];
         $this->seeHeaderWithRegExp('Location', "#/authors/{$id}$#");
     }
+
+    /** @test **/
+    public function update_can_update_an_existing_author()
+    {
+        $author = factory(\App\Author::class)->create();
+        $requestData = [
+            'name' => 'New Author Name',
+            'gender' => $author->gender === 'male' ? 'female' : 'male',
+            'biography' => 'An updated biography',
+        ];
+
+        $this ->put(
+            "/authors/{$author->id}",
+            $requestData,
+            ['Accept' => 'application/json']
+        )
+            ->seeStatusCode(200)
+            ->seeJson($requestData)
+            ->seeInDatabase('authors', [
+                'name' => 'New Author Name'
+            ])
+            ->notSeeInDatabase('authors', [
+                'name' => $author->name
+            ]);
+        $this->assertArrayHasKey('data', $this->response->getData(true));
+    }
+
+    /** @test **/
+    public function update_method_validates_required_fields()
+    {
+        $author = factory(\App\Author::class)->create();
+
+        $this->put("/authors/{$author->id}", [], ['Accept' => 'application/json']);
+
+        $this->seeStatusCode(422);
+
+        $data = $this->response->getData(true);
+
+        $fields = ['name', 'gender', 'biography'];
+        foreach ($fields as $field) {
+            $this->assertArrayHasKey($field, $data);
+            $this->assertEquals(["The {$field} field is required."], $data[$field]);
+        }
+    }
+
+    /** @test **/
+    public function validation_validates_required_fields()
+    {
+        $author = factory(\App\Author::class)->create();
+
+        $tests = [
+            ['method' => 'post', 'url' => '/authors'],
+            ['method' => 'put', 'url' => "/authors/{$author->id}"],
+        ];
+
+        foreach ($tests as $test) {
+            $method = $test['method'];
+
+            $this->{$method}($test['url'], [], ['Accept' => 'application/json']);
+            $this->seeStatusCode(422);
+
+            $data = $this->response->getData(true);
+
+            $fields = ['name', 'gender', 'biography'];
+            foreach ($fields as $field) {
+                $this->assertArrayHasKey($field, $data);
+                $this->assertEquals(["The {$field} field is required."], $data[$field]);
+            }
+        }
+    }
+
+    /** @test **/
+
+    public function validation_invalidates_incorrect_gender_data()
+    {
+        $author = factory(\App\Author::class)->create();
+
+        $tests = [
+            // Create
+            [
+                'method' => 'post',
+                'url' => '/authors',
+                'data' => [
+                    'name' => 'John Doe',
+                    'biography' => 'An anonymous author'
+                ]
+            ],
+            // Update
+            [
+                'method' => 'put',
+                'url' => "/authors/{$author->id}",
+                'data' => [
+                    'name' => $author->name,
+                    'biography' => $author->biography
+                ]
+            ]
+        ];
+
+        foreach ($tests as $test) {
+            $method = $test['method'];
+            $test['data']['gender'] = 'unknown';
+
+            $this->{$method}($test['url'], $test['data'], ['Accept' => 'application/json']);
+
+            $this->seeStatusCode(422);
+            $data = $this->response->getData(true);
+            $this->assertCount(1, $data);
+            $this->assertArrayHasKey('gender', $data);
+            $this->assertEquals(
+                ["Gender format is invalid: must equal 'male' or 'female'"],
+                $data['gender']
+            );
+        }
+    }
+
+    /** @test **/
+    public function validation_invalidates_name_when_name_is_just_too_long()
+    {
+        $author = factory(\App\Author::class)->create();
+
+        $tests = [
+            // Create
+            [
+                'method' => 'post',
+                'url' => '/authors',
+                'data' => [
+                    'name' => 'John Doe',
+                    'gender' => 'male',
+                    'biography' => 'An anonymous author'
+                ]
+            ],
+            // Update
+            [
+                'method' => 'put',
+                'url' => "/authors/{$author->id}",
+                'data' => [
+                    'name' => $author->name,
+                    'gender' => $author->gender,
+                    'biography' => $author->biography
+                ]
+            ]
+        ];
+
+        foreach ($tests as $test) {
+            $method = $test['method'];
+            $test['data']['name'] = str_repeat('a', 256);
+
+            $this->{$method}($test['url'], $test['data'], ['Accept' => 'application/json']);
+
+            $this->seeStatusCode(422);
+
+            $data = $this->response->getData(true);
+            $this->assertCount(1, $data);
+            $this->assertArrayHasKey('name', $data);
+            $this->assertEquals(
+                ["The name may not be greater than 255 characters."],
+                $data['name']
+            );
+        }
+    }
 }
