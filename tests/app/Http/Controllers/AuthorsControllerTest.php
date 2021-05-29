@@ -309,19 +309,23 @@ class AuthorsControllerTest extends TestCase
         }
     }
 
-    /** @test **/
-
-    public function validation_invalidates_incorrect_gender_data()
+    /**
+    * Provides boilerplate test instructions for validation.
+    * @return array
+    */
+    private function getValidationTestData()
     {
         $author = factory(\App\Author::class)->create();
 
-        $tests = [
+        return [
             // Create
             [
                 'method' => 'post',
                 'url' => '/authors',
+                'status' => 201,
                 'data' => [
                     'name' => 'John Doe',
+                    'gender' => 'male',
                     'biography' => 'An anonymous author'
                 ]
             ],
@@ -329,14 +333,20 @@ class AuthorsControllerTest extends TestCase
             [
                 'method' => 'put',
                 'url' => "/authors/{$author->id}",
+                'status' => 200,
                 'data' => [
                     'name' => $author->name,
+                    'gender' => $author->gender,
                     'biography' => $author->biography
                 ]
             ]
         ];
+    }
 
-        foreach ($tests as $test) {
+    /** @test **/
+    public function validation_invalidates_incorrect_gender_data()
+    {
+        foreach ($this->getValidationTestData() as $test) {
             $method = $test['method'];
             $test['data']['gender'] = 'unknown';
 
@@ -354,41 +364,29 @@ class AuthorsControllerTest extends TestCase
     }
 
     /** @test **/
+    public function validation_is_valid_when_name_is_just_long_enough()
+    {
+        foreach ($this->getValidationTestData() as $test) {
+            $method = $test['method'];
+            $test['data']['name'] = str_repeat('a', 255);
+
+            $this->{$method}($test['url'], $test['data'], ['Accept' => 'application/json']);
+
+            $this->seeStatusCode($test['status']);
+            $this->seeInDatabase('authors', $test['data']);
+        }
+    }
+
+    /** @test **/
     public function validation_invalidates_name_when_name_is_just_too_long()
     {
-        $author = factory(\App\Author::class)->create();
-
-        $tests = [
-            // Create
-            [
-                'method' => 'post',
-                'url' => '/authors',
-                'data' => [
-                    'name' => 'John Doe',
-                    'gender' => 'male',
-                    'biography' => 'An anonymous author'
-                ]
-            ],
-            // Update
-            [
-                'method' => 'put',
-                'url' => "/authors/{$author->id}",
-                'data' => [
-                    'name' => $author->name,
-                    'gender' => $author->gender,
-                    'biography' => $author->biography
-                ]
-            ]
-        ];
-
-        foreach ($tests as $test) {
+        foreach ($this->getValidationTestData() as $test) {
             $method = $test['method'];
             $test['data']['name'] = str_repeat('a', 256);
 
             $this->{$method}($test['url'], $test['data'], ['Accept' => 'application/json']);
 
             $this->seeStatusCode(422);
-
             $data = $this->response->getData(true);
             $this->assertCount(1, $data);
             $this->assertArrayHasKey('name', $data);
