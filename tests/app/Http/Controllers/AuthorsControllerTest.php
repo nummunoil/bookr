@@ -396,4 +396,22 @@ class AuthorsControllerTest extends TestCase
             );
         }
     }
+
+    /** @test **/
+    public function delete_can_remove_an_author_and_his_or_her_books()
+    {
+        $author = factory(\App\Author::class)->create();
+
+        $this->delete("/authors/{$author->id}")
+            ->seeStatusCode(204)
+            ->notSeeInDatabase('authors', ['id' => $author->id])
+            ->notSeeInDatabase('books', ['author_id' => $author->id]);
+    }
+
+    /** @test **/
+    public function deleting_an_invalid_author_should_return_a_404()
+    {
+        $this->delete('/authors/99999', [], ['Accept' => 'application/json'])
+            ->seeStatusCode(404);
+    }
 }
