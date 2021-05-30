@@ -31,3 +31,9 @@ $router->group(['prefix' => '/authors'], function () use ($router) {
     $router->put('/{id:[\d]+}', 'AuthorsController@update');
     $router->delete('/{id:[\d]+}', 'AuthorsController@destroy');
 });
+
+$router->group(['prefix' => '/bundles'], function () use ($router) {
+    $router->get('/{id:[\d]+}', ['as' => 'bundles.show', 'uses' => 'BundlesController@show']);
+    $router->put('/{bundleId:[\d]+}/books/{bookId:[\d]+}', 'BundlesController@addBook');
+    $router->delete('/{bundleId:[\d]+}/books/{bookId:[\d]+}', 'BundlesController@removeBook');
+});
