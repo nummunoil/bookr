@@ -109,4 +109,25 @@ class BundlesControllerTest extends TestCase
         $books = $body['data']['books'];
         $this->assertEquals($book->id, $books['data'][0]['id']);
     }
+
+    /** @test **/
+    public function removeBook_should_remove_a_book_from_a_bundle()
+    {
+        $bundle = $this->bundleFactory(3);
+
+        $book = $bundle->books()->first();
+        $this->seeInDatabase('book_bundle', [
+            'book_id' => $book->id,
+            'bundle_id' => $bundle->id
+        ]);
+        $this->assertCount(3, $bundle->books);
+        $this->delete("/bundles/{$bundle->id}/books/{$book->id}")
+            ->seeStatusCode(204)
+            ->notSeeInDatabase('book_bundle', [
+                'book_id' => $book->id,
+                'bundle_id' => $bundle->id
+            ]);
+        $dbBundle = \App\Bundle::find($bundle->id);
+        $this->assertCount(2, $dbBundle->books);
+    }
 }

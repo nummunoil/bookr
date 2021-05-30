@@ -34,4 +34,13 @@ class BundlesController extends Controller
         $data = $this->item($bundle, new BundleTransformer());
         return response()->json($data);
     }
+
+    public function removeBook($bundleId, $bookId)
+    {
+        $bundle = \App\Bundle::findOrFail($bundleId);
+        $book = \App\Book::findOrFail($bookId);
+
+        $bundle->books()->detach($book);
+        return response(null, 204);
+    }
 }
