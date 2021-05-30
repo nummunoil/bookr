@@ -61,4 +61,20 @@ class RatingTransformerTest extends TestCase
             $authorLink['href']
         );
     }
+
+    /**
+    * @test
+    * @expectedException \RuntimeException
+    * @expectedExceptionMessage Rateable model type for Foo\Bar is not defined
+    */
+    public function it_throws_an_exception_when_a_model_is_not_defined()
+    {
+        $rating = factory(\App\Rating::class)->create([
+            'value' => 5,
+            'rateable_type' => 'Foo\Bar',
+            'rateable_id' => 1
+        ]);
+
+        $this->subject->transform($rating);
+    }
 }
