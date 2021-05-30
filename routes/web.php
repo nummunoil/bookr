@@ -32,7 +32,7 @@ $router->group(['prefix' => '/authors'], function () use ($router) {
     $router->delete('/{id:[\d]+}', 'AuthorsController@destroy');
 
     // Author ratings
-    $router->post('/{id:[\d]+}/ratings', 'AuthorsRatingsController@store');
+    $router->post('/{authorId:[\d]+}/ratings', 'AuthorsRatingsController@store');
     $router->delete('/{authorId:[\d]+}/ratings/{ratingId:[\d]+}', 'AuthorsRatingsController@destroy');
 });
 

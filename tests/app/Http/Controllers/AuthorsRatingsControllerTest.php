@@ -20,6 +20,7 @@ class AuthorsRatingsControllerTest extends TestCase
             ['value' => 5],
             ['Accept' => 'application/json']
         );
+
         $this->seeStatusCode(201)
             ->seeJson([
                 'value' => 5
