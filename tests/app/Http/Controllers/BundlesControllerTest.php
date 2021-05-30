@@ -69,4 +69,44 @@ class BundlesControllerTest extends TestCase
             $books['data'][0]['updated']
         );
     }
+
+    /** @test **/
+    public function addBook_should_add_a_book_to_a_bundle()
+    {
+        $bundle = factory(\App\Bundle::class)->create();
+        $book = $this->bookFactory();
+
+        // Bundle should not have any associated books yet
+        $this->notSeeInDatabase('book_bundle', ['bundle_id' => $bundle->id]);
+
+        $this->put(
+            "/bundles/{$bundle->id}/books/{$book->id}",
+            [],
+            ['Accept' => 'application/json']
+        );
+
+        $this->seeStatusCode(200);
+
+        $dbBundle = \App\Bundle::with('books')->find($bundle->id);
+        $this->assertCount(
+            1,
+            $dbBundle->books,
+            'The bundle should have 1 associated book'
+        );
+        $this->assertEquals(
+            $dbBundle->books()->first()->id,
+            $book->id
+        );
+
+        $body = $this->response->getData(true);
+        $this->assertArrayHasKey('data', $body);
+
+        // Ensure the book id is in the response.
+        $this->assertArrayHasKey('books', $body['data']);
+        $this->assertArrayHasKey('data', $body['data']['books']);
+
+        // Make sure the book is in the response
+        $books = $body['data']['books'];
+        $this->assertEquals($book->id, $books['data'][0]['id']);
+    }
 }

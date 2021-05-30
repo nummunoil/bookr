@@ -18,4 +18,20 @@ class BundlesController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+    * @param int $bundleId
+    * @param int $bookId
+    * @return \Illuminate\Http\JsonResponse
+    */
+    public function addBook($bundleId, $bookId)
+    {
+        $bundle = \App\Bundle::findOrFail($bundleId);
+        $book = \App\Book::findOrFail($bookId);
+
+        $bundle->books()->attach($book);
+
+        $data = $this->item($bundle, new BundleTransformer());
+        return response()->json($data);
+    }
 }
