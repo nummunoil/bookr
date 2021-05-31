@@ -21,4 +21,20 @@ class AuthorsRatingsController extends Controller
 
         return response()->json($data, 201);
     }
+
+    /**
+    * @param $authorId
+    * @param $ratingId
+    * @return \Laravel\Lumen\Http\ResponseFactory
+    */
+    public function destroy($authorId, $ratingId)
+    {
+        /** @var \App\Author $author */
+        $author = Author::findOrFail($authorId);
+        $author->ratings()
+            ->findOrFail($ratingId)
+            ->delete();
+
+        return response(null, 204);
+    }
 }
