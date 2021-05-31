@@ -58,7 +58,7 @@ class AuthorTransformerTest extends TestCase
 
         // Rating
         $this->assertArrayHasKey('rating', $actual);
-        $this->assertInternalType('array', $actual['rating']);
+        $this->assertIsArray($actual['rating']);
         $this->assertEquals(4, $actual['rating']['average']);
         $this->assertEquals(5, $actual['rating']['max']);
         $this->assertEquals(80, $actual['rating']['percent']);
